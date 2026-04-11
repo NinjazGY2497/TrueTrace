@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anti-Vibe</title>
+    <title>TrueTrace</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-    <h1>AI Detection Tool</h1>
+    <div class="container">
+    <h1>TrueTrace</h1>
 
     <div class="mode-toggle">
         <button id="btnText" class="mode-btn active" onclick="switchMode('text')">Text Analysis</button>
@@ -47,8 +48,15 @@
                 <span class="result-label">Analysis Result</span>
                 <span class="result-badge" id="resultBadge">—</span>
             </div>
+
+            <hr class="breakdown-divider">
+            <p class="breakdown-title">Why we think this</p>
+            <p class="breakdown-title">AI Will Tell Us Why HERE</p>
+            <div id="breakdownList"></div>
+
             <button class="analyze-btn secondary" onclick="goBack()">← Analyze Another</button>
         </div>
+    </div>
     </div>
 
     <script src="imageInputButton.js"></script>
