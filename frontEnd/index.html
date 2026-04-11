@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anti-Vibe</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <h1>AI Detection Tool</h1>
+
+    <div class="mode-toggle">
+        <button id="btnText" class="mode-btn active" onclick="switchMode('text')">Text Analysis</button>
+        <button id="btnImage" class="mode-btn" onclick="switchMode('image')">Image Analysis</button>
+    </div>
+
+    <div id="textSection" class="section">
+        <label for="textInput"><strong>Text to Analyze:</strong></label>
+        <br><br>
+        <textarea id="textInput" rows="10" cols="80" placeholder="Paste your text here..."></textarea>
+        <br><br>
+        <button class="analyze-btn" onclick="showResults()">Analyze Text</button>
+    </div>
+
+    <div id="imageSection" class="section hidden">
+        <label for="imageInput"><strong>Image to Analyze:</strong></label>
+        <br><br>
+        <input type="file" id="imageInput" accept="image/*">
+        <br><br>
+        <div id="imagePreview"></div>
+        <br>
+        <button class="analyze-btn" id="analyzeImageBtn" onclick="showResults()" style="display:none;">Analyze Image</button>
+    </div>
+
+    <div id="resultsSection" class="section hidden">
+        <div class="results-card">
+            <h2>Analysis Complete</h2>
+            <div class="result-row">
+                <span class="result-label">Confidence Level</span>
+                <div class="confidence-bar-wrap">
+                    <div class="confidence-bar" id="confidenceBar"></div>
+                </div>
+                <span class="confidence-pct" id="confidencePct">—</span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Analysis Result</span>
+                <span class="result-badge" id="resultBadge">—</span>
+            </div>
+            <button class="analyze-btn secondary" onclick="goBack()">← Analyze Another</button>
+        </div>
+    </div>
+
+    <script src="imageInputButton.js"></script>
+    <script src="application.js"></script>
+</body>
+</html>
