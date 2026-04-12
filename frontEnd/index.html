@@ -21,7 +21,7 @@
         <br><br>
         <textarea id="textInput" rows="10" cols="80" placeholder="Paste your text here..."></textarea>
         <br><br>
-        <button class="analyze-btn" onclick="showResults()">Analyze Text</button>
+        <button class="analyze-btn" onclick="showResults('text')">Analyze Text</button>
     </div>
 
     <div id="imageSection" class="section hidden">
@@ -31,7 +31,7 @@
         <br><br>
         <div id="imagePreview"></div>
         <br>
-        <button class="analyze-btn" id="analyzeImageBtn" onclick="showResults()" style="display:none;">Analyze Image</button>
+        <button class="analyze-btn" id="analyzeImageBtn" onclick="showResults('image')" style="display:none;">Analyze Image</button>
     </div>
 
     <div id="resultsSection" class="section hidden">
@@ -54,12 +54,12 @@
             <p class="breakdown-title">AI Will Tell Us Why HERE</p>
             <div id="breakdownList"></div>
 
-            <button class="analyze-btn secondary" onclick="goBack()">← Analyze Another</button>
+            <button class="analyze-btn secondary" onclick="goBack()">← &nbsp;Analyze Another</button>
         </div>
     </div>
     </div>
 
     <script src="imageInputButton.js"></script>
-    <script src="application.js"></script>
+    <script type="module" src="application.js"></script>
 </body>
 </html>

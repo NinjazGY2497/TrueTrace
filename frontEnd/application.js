@@ -1,3 +1,5 @@
+import { requestBackend } from "./requestBackend.js";
+
 let currentMode = 'text';
 
 function switchMode(mode) {
@@ -11,13 +13,15 @@ function switchMode(mode) {
     document.getElementById('btnImage').classList.toggle('active', mode === 'image');
 }
 
-function showResults() {
+async function showResults(mode) {
     document.getElementById('textSection').classList.add('hidden');
     document.getElementById('imageSection').classList.add('hidden');
 
-    const confidence = 87;
-    const isAI = true;
+    let data = await requestBackend(mode);
 
+    const confidence = Math.round(data["confidence"] * 100);
+    const isAI = (data["label"].toLowerCase() === "human") ? false : true;
+    console.log(confidence, isAI)
     const bar = document.getElementById('confidenceBar');
     bar.style.setProperty('--bar-width', confidence + '%');
     bar.style.width = '0%';
@@ -37,3 +41,7 @@ function goBack() {
     document.getElementById('resultsSection').classList.add('hidden');
     switchMode(currentMode);
 }
+
+window.switchMode = switchMode;
+window.showResults = showResults;
+window.goBack = goBack;
