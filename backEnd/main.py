@@ -1,183 +1,128 @@
-import json
 import os
-from dotenv import load_dotenv
+import json
+import requests
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import requests
+from dotenv import load_dotenv
+import random
 
-load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
-
+load_dotenv()
 HF_KEY = os.getenv("HF_KEY")
-if not HF_KEY:
-    raise ValueError("HF_KEY is not set in backEnd/.env")
-
-CHAT_API_URL = "https://router.huggingface.co/v1/chat/completions"
-IMAGE_API_URL = "https://router.huggingface.co/hf-inference/models/Organika/sdxl-detector"
 
 app = Flask(__name__)
 CORS(app)
 
-
-def callHFAPI(url, *, data=None, json_payload=None, headers=None, timeout=30):
-    requestHeaders = {"Authorization": f"Bearer {HF_KEY}"}
-    if headers:
-        requestHeaders.update(headers)
-
-    response = requests.post(
-        url,
-        headers=requestHeaders,
-        data=data,
-        json=json_payload,
-        timeout=timeout,
-    )
-    response.raise_for_status()
-    payload = response.json()
-    if isinstance(payload, dict) and payload.get("error"):
-        raise RuntimeError(payload["error"])
-    return payload
-
-
-def normalize_label(value):
-    text = str(value or "").lower()
-    if any(token in text for token in ("ai", "artificial", "generated", "synthetic")):
-        return "ai"
-    return "human"
-
-
-def parse_json_output(text):
-    text = str(text or "").strip()
-    if not text.startswith("{") or not text.endswith("}"):
-        start = text.find("{")
-        end = text.rfind("}")
-        if start != -1 and end != -1:
-            text = text[start:end + 1]
-    return json.loads(text)
-
-
-def normalize_response(label, confidence, reasons):
-    label = normalize_label(label)
-    try:
-        confidence = float(confidence)
-    except (TypeError, ValueError):
-        confidence = 0.0
-    confidence = max(0.0, min(confidence, 1.0))
-
-    if not isinstance(reasons, list):
-        reasons = [str(reasons)]
-    if not reasons:
-        reasons = ["No explanation was provided by the model."]
-
-    return label, confidence, reasons
-
-
-def request_image_model(image_file):
-    if image_file is None:
-        raise ValueError("Image file is required.")
-
-    headers = {"Content-Type": image_file.content_type or "image/png"}
-    image_bytes = image_file.read()
-    payload = callHFAPI(IMAGE_API_URL, data=image_bytes, headers=headers)
-
-    entry = None
-    if isinstance(payload, list) and payload:
-        entry = payload[0]
-    elif isinstance(payload, dict):
-        entry = payload
-
-    label = normalize_label(entry.get("label") if isinstance(entry, dict) else None)
-    confidence = (entry.get("score") or entry.get("confidence") or 0.0) if isinstance(entry, dict) else 0.0
-    reasons = [
-        "The image appears to contain natural detail and texture consistent with a real photo."
-    ]
-    if label == "ai":
-        reasons = [
-            "The image shows patterns more consistent with AI-generated characteristics.",
-            "The classifier is more confident about synthetic image features than natural photography."
-        ]
-
-    return normalize_response(label, confidence, reasons)
-
-
-def request_text_model(text):
-    if not isinstance(text, str) or not text.strip():
-        raise ValueError("Text content is required for analysis.")
-
-    messages = [
-        {
-            "role": "system",
-            "content": (
-                "You are a forensic linguist. Analyze the provided text and determine whether it is AI-generated or human-written. "
-                "Return only a JSON object with exactly these fields: label, confidence, and reasons. "
-                "label must be \"human\" or \"ai\". confidence must be a number between 0 and 1. "
-                "reasons must be a list of short explanation strings."
-            )
-        },
-        {
-            "role": "user",
-            "content": f"Text:\n{text}\n\nRespond with a JSON object only. Do not add any extra text."
-        }
-    ]
-
-    payload = callHFAPI(
-        CHAT_API_URL,
-        json_payload={
-            "model": "openai/gpt-oss-120b:fastest",
-            "messages": messages,
-            "temperature": 0.2,
-            "max_tokens": 300,
-        },
-    )
-
-    choices = payload.get("choices")
-    if not isinstance(choices, list) or not choices:
-        raise RuntimeError("Text API returned unexpected response data.")
-
-    assistant_text = choices[0].get("message", {}).get("content", "")
-    try:
-        parsed = parse_json_output(assistant_text)
-    except Exception:
-        return normalize_response(
-            assistant_text,
-            0.5,
-            [
-                "The model response could not be parsed as JSON, so this result is a fallback interpretation.",
-                assistant_text.strip()[:200],
-            ],
-        )
-
-    return normalize_response(
-        parsed.get("label"),
-        parsed.get("confidence", 0.0),
-        parsed.get("reasons", []),
-    )
-
+# API Endpoints
+TEXT_DETECT_MODEL = "https://router.huggingface.co/v1/chat/completions"
+IMAGE_DETECT_MODEL = "https://router.huggingface.co/hf-inference/models/Organika/sdxl-detector"
 
 @app.route("/text-detect", methods=["POST"])
-def text_detect():
-    payload = request.get_json(silent=True)
-    if not isinstance(payload, dict) or not payload.get("text"):
-        return jsonify({"error": "Request body must be JSON with a non-empty text field."}), 400
+def textDetect():
+    data = request.get_json()
+    userText = data.get("text", "")
+
+    if not userText:
+        print("**main.py** - ERROR - No text provided in text detect request")
+        return jsonify({"error": "No text provided"}), 400
+    else:
+        print(f"**main.py** - INFO - Incoming text data for text detect: '{userText[:50]}'...")
+
+    headers = {"Authorization": f"Bearer {HF_KEY}"}
+    payload = {
+        "model": "openai/gpt-oss-120b:fastest",
+        "messages": [
+            {
+                "role": "system", 
+                "content": "Analyze if the text is AI or Human. Return ONLY a JSON object: {'label': 'ai/human', 'confidence': 0.0, 'reasons': []}"
+            },
+            {"role": "user", "content": userText}
+        ],
+        "temperature": 0.1 # Most safe
+    }
 
     try:
-        label, confidence, reasons = request_text_model(payload["text"])
-    except Exception as exc:
-        return jsonify({"error": str(exc)}), 500
+        response = requests.post(TEXT_DETECT_MODEL, headers=headers, json=payload, timeout=30)
+        response.raise_for_status()
+        
+        result = response.json()
+        aiResponse: str = result['choices'][0]['message']['content'] # Extract AI's written text
+        
+        # Clean it up just in case it adds extra words around the JSON because AI is unpredictable
+        start = aiResponse.find("{")
+        end = aiResponse.rfind("}")
+        jsonStr = aiResponse[start:end+1]
+        finalData = json.loads(jsonStr)
 
-    return jsonify({"label": label, "confidence": confidence, "reasons": reasons})
+        print(f"**main.py** - INFO - Text detect result: {finalData}")
+
+        return jsonify(finalData)
+
+    except Exception as e:
+        return jsonify({"error": f"Failed to analyze text: {str(e)}"}), 500
 
 
 @app.route("/image-detect", methods=["POST"])
-def image_detect():
-    image_file = request.files.get("file")
-    if image_file is None:
-        return jsonify({"error": "Image file field 'file' is required."}), 400
+def imageDetect():
+    file = request.files.get("file")
+    
+    if not file:
+        print("**main.py** - ERROR - No image uploaded")
+        return jsonify({"error": "No image uploaded"}), 400
+    else:
+        print(f"**main.py** - INFO - Incoming image data for image detect")
+
+    imgBytes = file.read()
+
+    headers = {
+        "Authorization": f"Bearer {HF_KEY}",
+        "Content-Type": file.content_type
+    }
 
     try:
-        label, confidence, reasons = request_image_model(image_file)
-    except Exception as exc:
-        return jsonify({"error": str(exc)}), 500
+        response = requests.post(IMAGE_DETECT_MODEL, headers=headers, data=imgBytes, timeout=30)
+        response.raise_for_status()
+        
+        result = response.json()
+        aiResponse = result[0]
+        label = aiResponse['label'].lower()
 
-    return jsonify({"label": label, "confidence": confidence, "reasons": reasons})
+        insights = { # Image detection model can't talk, so provide some known educational insights
+            "artificial": [
+                "● Try to identify 'over-smoothing' in complex textures (ex: skin or hair).",
+                "● Lighting patterns appear mathematically consistent rather than naturally reflected.",
+                "● Perhaps lack of organic 'sensor noise' typically found in physical camera hardware.",
+                "● Anatomical Anomalies: Look for 'logical' errors in complex areas like overlapping fingers, ear shapes, or teeth alignment.",
+                "● Background Incoherence: Elements in the background often merge together or turn into 'nonsense' shapes that don't follow physical laws.",
+                "● Frequency Artifacts: Tiny 'checkerboard' patterns or grid-like noise can appear in flat areas (like skies) due to how AI builds pixels.",
+                "● The Uncanny Valley: Surfaces (like skin or plastic) may look too perfect or 'waxy,' missing the tiny pores and scars found in reality.",
+                "● Non-Physical Reflections: Reflections in eyes or on shiny surfaces often don't match the light sources in the rest of the image."
+            ],
+            "human": [
+                "● Presence of natural chromatic aberration or lens imperfections.",
+                "● Texture details show organic randomness consistent with light hitting a physical sensor.",
+                "● Anatomical and environmental shadows follow complex, non-algorithmic physics.",
+                "● Lens Physics: Real glass lenses create specific imperfections like 'Chromatic Aberration' (purple/green fringing on high-contrast edges).",
+                "● Consistent Perspective: All lines in the image lead toward a single, mathematically correct vanishing point based on the camera's position.",
+                "● Sensor Noise: High-zoom areas show 'grain' created by the physical camera sensor, which is more random than AI-generated noise.",
+                "● Environmental Logic: Small details—like the text on a distant sign or the way a shadow hits a blade of grass—are legible and logical.",
+                "● Motion Blur: If there is movement, the blur follows a clear direction (the path of the object), which is very difficult for AI to simulate."
+            ]
+        }
+        allCategoryReasons = insights.get(label)
+        selectedReasons = random.sample(allCategoryReasons, 3)
+ 
+        finalData = {
+            "label": label,
+            "confidence": round(aiResponse['score'], 2),
+            "reasons": selectedReasons
+        }
+
+        print(f"**main.py** - INFO - Image detect result: {finalData}")
+
+        return jsonify(finalData)
+
+    except Exception as e:
+        return jsonify({"error": f"Failed to analyze image: {str(e)}"}), 500
 
 
 if __name__ == "__main__":

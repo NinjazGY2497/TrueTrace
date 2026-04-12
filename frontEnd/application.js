@@ -14,15 +14,18 @@ function switchMode(mode) {
 }
 
 async function showResults(mode) {
+    const loadingSection = document.getElementById('loadingSection');
+
     document.getElementById('textSection').classList.add('hidden');
     document.getElementById('imageSection').classList.add('hidden');
+    loadingSection.classList.remove('hidden');
 
     try {
         let data = await requestBackend(mode);
 
         const confidence = Math.round(data["confidence"] * 100);
         const isAI = (data["label"].toLowerCase() === "human") ? false : true;
-        console.log(confidence, isAI)
+        
         const bar = document.getElementById('confidenceBar');
         bar.style.setProperty('--bar-width', confidence + '%');
         bar.style.width = '0%';
@@ -49,10 +52,12 @@ async function showResults(mode) {
             breakdownList.textContent = 'No explanation available.';
         }
 
+        loadingSection.classList.add('hidden');
         document.getElementById('resultsSection').classList.remove('hidden');
     } catch (error) {
         console.error('Analysis failed:', error);
         alert('Analysis failed. Please check that the backend is running and the browser console for details.');
+        loadingSection.classList.add('hidden');
         document.getElementById('textSection').classList.toggle('hidden', mode !== 'text');
         document.getElementById('imageSection').classList.toggle('hidden', mode !== 'image');
     }
