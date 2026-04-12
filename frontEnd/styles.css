@@ -15,6 +15,10 @@
     to   {width: var(--bar-width); }
 }
 
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
 body {
     background: linear-gradient(-45deg, #e0d7ff, #c4b0ff, #a78bfa, #b898ef);
     animation: gradientBG 15s ease infinite;
@@ -158,6 +162,26 @@ input[type="file"]::file-selector-button:active {
 }
 
 .analyze-btn.secondary:hover {background: rgba(124, 58, 237, 0.1);}
+
+.loading-card {
+    background: rgba(255,255,255,0.6);
+    border: 1.5px solid #c4b5fd;
+    border-radius: 16px;
+    padding: 28px;
+    max-width: 500px;
+    margin: 0 auto;
+    backdrop-filter: blur(6px);
+}
+
+.loading-spinner {
+    width: 54px;
+    height: 54px;
+    margin: 0 auto 16px;
+    border: 6px solid rgba(124, 58, 237, 0.2);
+    border-top-color: #7c3aed;
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+}
 
 .results-card {
     background: rgba(255,255,255,0.55);

@@ -34,6 +34,14 @@
         <button class="analyze-btn" id="analyzeImageBtn" onclick="showResults('image')" style="display:none;">Analyze Image</button>
     </div>
 
+    <div id="loadingSection" class="section hidden">
+        <div class="loading-card">
+            <div class="loading-spinner" aria-hidden="true"></div>
+            <h2>Analyzing your content...</h2>
+            <p>This can take a few seconds while we wait for the backend.</p>
+        </div>
+    </div>
+
     <div id="resultsSection" class="section hidden">
         <div class="results-card">
             <h2>Analysis Complete</h2>
