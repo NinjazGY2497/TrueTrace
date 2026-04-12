@@ -32,7 +32,7 @@ def textDetect():
         "model": "openai/gpt-oss-120b:fastest",
         "messages": [
             {
-                "role": "system", 
+                "role": "system",
                 "content": "Analyze if the text is AI or Human. Return ONLY a JSON object: {'label': 'ai/human', 'confidence': 0.0, 'reasons': []}"
             },
             {"role": "user", "content": userText}
@@ -43,10 +43,10 @@ def textDetect():
     try:
         response = requests.post(TEXT_DETECT_MODEL, headers=headers, json=payload, timeout=30)
         response.raise_for_status()
-        
+
         result = response.json()
         aiResponse: str = result['choices'][0]['message']['content'] # Extract AI's written text
-        
+
         # Clean it up just in case it adds extra words around the JSON because AI is unpredictable
         start = aiResponse.find("{")
         end = aiResponse.rfind("}")
@@ -64,7 +64,7 @@ def textDetect():
 @app.route("/image-detect", methods=["POST"])
 def imageDetect():
     file = request.files.get("file")
-    
+
     if not file:
         print("**main.py** - ERROR - No image uploaded")
         return jsonify({"error": "No image uploaded"}), 400
@@ -81,7 +81,7 @@ def imageDetect():
     try:
         response = requests.post(IMAGE_DETECT_MODEL, headers=headers, data=imgBytes, timeout=30)
         response.raise_for_status()
-        
+
         result = response.json()
         aiResponse = result[0]
         label = aiResponse['label'].lower()
@@ -91,26 +91,26 @@ def imageDetect():
                 "● Try to identify 'over-smoothing' in complex textures (ex: skin or hair).",
                 "● Lighting patterns appear mathematically consistent rather than naturally reflected.",
                 "● Perhaps lack of organic 'sensor noise' typically found in physical camera hardware.",
-                "● Anatomical Anomalies: Look for 'logical' errors in complex areas like overlapping fingers, ear shapes, or teeth alignment.",
+                "● Anatomical Anomalies: Look for 'logical' errors in complex areas like for example: overlapping fingers, ear shapes, or teeth alignment.",
                 "● Background Incoherence: Elements in the background often merge together or turn into 'nonsense' shapes that don't follow physical laws.",
-                "● Frequency Artifacts: Tiny 'checkerboard' patterns or grid-like noise can appear in flat areas (like skies) due to how AI builds pixels.",
+                "● Learn about Frequency Artifacts: Tiny 'checkerboard' patterns or grid-like noise can appear in flat areas (like skies) due to how AI builds pixels.",
                 "● The Uncanny Valley: Surfaces (like skin or plastic) may look too perfect or 'waxy,' missing the tiny pores and scars found in reality.",
                 "● Non-Physical Reflections: Reflections in eyes or on shiny surfaces often don't match the light sources in the rest of the image."
             ],
             "human": [
                 "● Presence of natural chromatic aberration or lens imperfections.",
                 "● Texture details show organic randomness consistent with light hitting a physical sensor.",
-                "● Anatomical and environmental shadows follow complex, non-algorithmic physics.",
+                "● Tip: Anatomical and environmental shadows follow complex, non-algorithmic physics.",
                 "● Lens Physics: Real glass lenses create specific imperfections like 'Chromatic Aberration' (purple/green fringing on high-contrast edges).",
                 "● Consistent Perspective: All lines in the image lead toward a single, mathematically correct vanishing point based on the camera's position.",
                 "● Sensor Noise: High-zoom areas show 'grain' created by the physical camera sensor, which is more random than AI-generated noise.",
-                "● Environmental Logic: Small details—like the text on a distant sign or the way a shadow hits a blade of grass—are legible and logical.",
+                "● Always Consider Environmental Logic: Small details—like the text on a distant sign or the way a shadow hits a blade of grass—are legible and logical.",
                 "● Motion Blur: If there is movement, the blur follows a clear direction (the path of the object), which is very difficult for AI to simulate."
             ]
         }
         allCategoryReasons = insights.get(label)
         selectedReasons = random.sample(allCategoryReasons, 3)
- 
+
         finalData = {
             "label": label,
             "confidence": round(aiResponse['score'], 2),
