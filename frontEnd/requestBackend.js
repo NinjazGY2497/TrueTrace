@@ -1,4 +1,4 @@
-const BASE_URL = "http://127.0.0.1:2497";
+const BASE_URL = "https://hackathoncrewraag.pythonanywhere.com";
 const imageInput = document.querySelector("#imageInput");
 const textInput = document.querySelector("#textInput");
 
