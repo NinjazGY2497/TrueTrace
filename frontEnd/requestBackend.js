@@ -1,44 +1,53 @@
+const BASE_URL = "http://127.0.0.1:2497";
 const imageInput = document.querySelector("#imageInput");
 const textInput = document.querySelector("#textInput");
 
-export async function requestBackend(mode) {
-    let response;
-    if (mode === 'image') {
-        let file = imageInput.files[0];
+async function postJson(path, payload) {
+    const response = await fetch(`${BASE_URL}${path}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+    });
+    if (!response.ok) {
+        const error = await response.json().catch(() => null);
+        throw new Error(error?.error || "Backend request failed");
+    }
+    return response.json();
+}
 
+async function postForm(path, formData) {
+    const response = await fetch(`${BASE_URL}${path}`, {
+        method: "POST",
+        body: formData,
+    });
+    if (!response.ok) {
+        const error = await response.json().catch(() => null);
+        throw new Error(error?.error || "Backend request failed");
+    }
+    return response.json();
+}
+
+export async function requestBackend(mode) {
+    if (mode === "image") {
+        const file = imageInput.files[0];
         if (!file) {
             alert("Please select an image file.");
             return;
         }
 
-        let formData = new FormData();
+        const formData = new FormData();
         formData.append("file", file);
+        return postForm("/image-detect", formData);
+    }
 
-        const BACKEND_URL = "http://127.0.0.1:2497/image-detect"; 
-        response = await fetch(BACKEND_URL, {
-            method: "POST",
-            body: formData
-        });
-    } else if (mode === 'text') {
-        let text = textInput.value.trim();
-
+    if (mode === "text") {
+        const text = textInput.value.trim();
         if (!text) {
             alert("Please enter some text.");
             return;
         }
-
-        const BACKEND_URL = "http://127.0.0.1:2497/text-detect";
-        response = await fetch(BACKEND_URL, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ text })
-        });
-    } else {
-        throw new Error("Invalid mode");
+        return postJson("/text-detect", { text });
     }
 
-    if (!response.ok) throw new Error("Error from backend");
-    return await response.json();
+    throw new Error("Invalid mode");
 }
