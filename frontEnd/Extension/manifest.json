@@ -1,0 +1,16 @@
+{
+  "name": "TrueTrace",
+  "description": "An learning based AI detector that detects if text or an image is AI generated or human-made, and then provides constructive feedback to help users improve their AI detecting skills.",
+  "version": "0.1",
+  "manifest_version": 3,
+  "permissions": ["storage", "activeTab", "scripting"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_icon": "logo.png", 
+    "default_title": "TrueTrace",
+    "default_popup": "popup/popup.html"
+  }
+}
