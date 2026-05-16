@@ -71,26 +71,8 @@ h1 {
 .mode-btn.active   {background: #7c3aed; color: #fff;}
 .mode-btn:active   {transform: scale(0.97);}
 
-.section  {animation: fadeIn 0.3s ease; text-align: center;}
+.section  {animation: fadeIn 0.3s ease; text-align: center}
 .hidden   {display: none !important;}
-
-textarea {
-    background: rgba(255,255,255,0.6);
-    border: 1.5px solid #c4b5fd;
-    border-radius: 10px;
-    padding: 12px;
-    font-family: inherit;
-    font-size: 14px;
-    color: #1e1b2e;
-    resize: vertical;
-    width: 100%;
-    max-width: 700px;
-    box-sizing: border-box;
-    outline: none;
-    text-align: left;
-}
-
-textarea:focus {border-color: #7c3aed;}
 
 input[type="file"] {
     background: rgba(255,255,255,0.6);
