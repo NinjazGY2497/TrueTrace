@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TrueTrace</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/textArea.css">
 </head>
 <body>
 
@@ -19,7 +20,16 @@
     <div id="textSection" class="section">
         <label for="textInput"><strong>Text to Analyze:</strong></label>
         <br><br>
-        <textarea id="textInput" rows="10" cols="80" placeholder="Paste your text here..."></textarea>
+        <div class="textAreaContainer">
+            <textarea id="textInput" rows="10" cols="80" placeholder="Paste your text here..."></textarea>
+
+            <div class="overlay-container">
+                <label for="uploadImgOverlayBtn"><strong>Extract Text</strong></label>
+                <button class="overlay-btn" id="uploadImgOverlayBtn" title="Upload Image">
+                    <img src="images/upload image.png">
+                </button>
+            </div>
+        </div>
         <br><br>
         <button class="analyze-btn" onclick="showResults('text')">Analyze Text</button>
     </div>

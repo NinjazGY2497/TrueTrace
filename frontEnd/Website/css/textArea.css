@@ -1,0 +1,90 @@
+.textAreaContainer {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    max-width: 800px;
+    border: 2px solid blue;
+}
+
+textarea {
+    background: rgba(255,255,255,0.6);
+    border: 1.5px solid #c4b5fd;
+    border-radius: 10px;
+    padding: 12px;
+    font-family: inherit;
+    font-size: 14px;
+    color: #1e1b2e;
+    resize: vertical;
+    width: 100%;
+    box-sizing: border-box;
+    outline: none;
+    text-align: left;
+}
+
+textarea:focus {border-color: #7c3aed;}
+
+/* Overlay Container */
+.overlay-container {
+    display: flex;
+    justify-content: right;
+    align-items: center;
+
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 46px;
+
+    background-color: #c4b5fd;
+    border-radius: 10px;
+    padding: 2px 3px;
+    transition: width 0.2s ease;
+}
+
+.overlay-container:hover {
+    width: 175px;
+}
+
+/* Overlay Children */
+.overlay-container * {
+    background: transparent;
+    border: none;
+}
+
+/* Overlay Button */
+.overlay-container button {
+    cursor: pointer;
+    padding: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    border-radius: 25%;
+    transition: background-color 0.3s ease;
+    
+    /* border: 2px solid #7c3aed; */
+}
+
+.overlay-container img {
+    width: 35px;
+    height: 35px;
+}
+
+.overlay-container button:hover {
+    background-color: rgba(124, 58, 237, 0.148);
+}
+
+/* Overlay Text */
+.overlay-container label {
+    opacity: 0;
+    transition: opacity 0.1s ease;
+
+    width: 100%;
+    margin-left: 5px;
+    font-size: 20px;
+    white-space: nowrap;
+}
+
+.overlay-container:hover label {
+    display: block;
+    opacity: 1;
+}
