@@ -3,7 +3,6 @@
     display: inline-block;
     width: 100%;
     max-width: 800px;
-    border: 2px solid blue;
 }
 
 textarea {
@@ -28,6 +27,7 @@ textarea:focus {border-color: #7c3aed;}
     display: flex;
     justify-content: right;
     align-items: center;
+    overflow: hidden;
 
     position: absolute;
     top: 12px;
@@ -75,16 +75,22 @@ textarea:focus {border-color: #7c3aed;}
 
 /* Overlay Text */
 .overlay-container label {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     opacity: 0;
-    transition: opacity 0.1s ease;
+    transform: translateX(10px);
+    transition: opacity 0.15s ease, transform 0.15s ease;
 
-    width: 100%;
+    width: auto;
     margin-left: 5px;
     font-size: 20px;
+    line-height: 1;
     white-space: nowrap;
 }
 
 .overlay-container:hover label {
-    display: block;
     opacity: 1;
+    transform: translateX(0);
 }
