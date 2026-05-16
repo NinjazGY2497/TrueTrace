@@ -1,0 +1,2 @@
+- Text Area size's height will now save
+     + If you didn't know, you already could use the grip in the bottom right corner of the box to resize it 
